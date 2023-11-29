@@ -15,7 +15,7 @@ If you just need to render basic markdown, you can do
 use dioxus_markdown::Markdown;
 ...
     rsx!{
-        Markdown {src="# Mardown power !"}
+        Markdown {src:"# Mardown power !"}
     }
 ```
 
