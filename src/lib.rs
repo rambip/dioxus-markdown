@@ -97,11 +97,8 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
     fn el_with_attributes(self, e: HtmlElement, inside: Self::View, attributes: ElementAttributes<EventHandler<'a, MouseEvent>>) -> Self::View {
         let class = attributes.classes.join(" ");
         let style = attributes.style.unwrap_or_default();
-        let onclick = move |e| {
-            if let Some(f) = &attributes.on_click {
-                f.call(e)
-            }
-        };
+        let onclick = attributes.on_click.unwrap_or_default();
+        let onclick = move |e| onclick.call(e);
 
         let vnode = match e {
             HtmlElement::Div => rsx!{div {onclick:onclick, style: "{style}", class: "{class}", inside } },
