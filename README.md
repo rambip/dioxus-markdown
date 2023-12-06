@@ -31,6 +31,11 @@ Here is an illustration:
 
 see [here](https://rambip.github.io/dioxus-markdown/showcase)
 
+## Editor
+Of course, a basic markdown editor is included.
+
+You can test for yourself [here](https://rambip.github.io/dioxus-markdown/editor) !
+
 ## Interactivity
 see [here](https://rambip.github.io/dioxus-markdown/onclick)
 
