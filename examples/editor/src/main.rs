@@ -27,20 +27,12 @@ fn App(cx: Scope) -> Element {
         h1 {"Markdown Editor"},
         div {
             class: "container",
-            textarea {
-                value: "{content}",
-                rows: "30",
-                oninput: move |evt| content.set(evt.value.clone()),
-            },
             div {
-                class: "md-view",
-                Markdown {
-                    src: content,
-                    wikilinks: *wikilinks_enabled.get(),
-                    hard_line_breaks: *hardbreaks_enabled.get(),
+                textarea {
+                    value: "{content}",
+                    rows: "30",
+                    oninput: move |evt| content.set(evt.value.clone()),
                 },
-            }
-            div {
                 div {
                     label { r#for: "wiki", "enable wikilinks" },
                     input {r#type: "checkbox", id: "wiki",
@@ -59,8 +51,17 @@ fn App(cx: Scope) -> Element {
                         oninput: move |e| debug_enabled.set(e.value=="true")
                     }
                 }
+            },
+            div {
+                class: "md-view",
+                Markdown {
+                    src: content,
+                    wikilinks: *wikilinks_enabled.get(),
+                    hard_line_breaks: *hardbreaks_enabled.get(),
+                },
             }
             div {
+                class: "debug-view",
                 if **debug_enabled {
                     cx.render(rsx!{
                         Logger {}
