@@ -1,7 +1,7 @@
 use rust_web_markdown::{
     render_markdown, 
     CowStr,
-    MdComponentProps  as __MdComponentProps
+    MdComponentProps  as __MdComponentProps,
 };
 
 pub type MdComponentProps<'a> = __MdComponentProps<Element<'a>>;
@@ -23,6 +23,14 @@ use web_sys::window;
 use std::rc::Rc;
 
 type HtmlCallback<'a, T> = Rc<dyn Fn(T) -> Element<'a>>;
+
+#[cfg(feature="debug")]
+pub mod debug {
+    use super::*;
+    #[derive(Clone)]
+    pub struct EventInfo(pub Vec<String>);
+}
+
 
 #[derive(Props)]
 pub struct MdProps<'a> {
@@ -56,7 +64,7 @@ pub struct MdProps<'a> {
     #[props(default)]
     components: HashMap<String, HtmlCallback<'a, MdComponentProps<'a>>>,
 
-    frontmatter: Option<UseState<String>>
+    frontmatter: Option<UseState<String>>,
 }
 
 #[derive(Clone, Debug)]
@@ -86,12 +94,22 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
     
     type MouseEvent = MouseEvent;
 
-    fn set<T: 'static>(self, setter: &Self::Setter<T>, value: T) {
-        setter.set(value)
+    fn set<T: 'static + PartialEq>(self, setter: &Self::Setter<T>, value: T) {
+        if setter.get() != &value {
+            // to avoid re-rendering the parent component
+            // if not needed
+            setter.set(value)
+        }
     }
 
+    #[cfg(feature="debug")]
     fn send_debug_info(self, info: Vec<String>) {
-        panic!("{info:?}")
+        let debug = use_shared_state::<debug::EventInfo>(self.0).unwrap();
+        // to avoid re-rendering the parent component
+        // if not needed
+        if *debug.read().0 != info {
+            debug.write().0 = info
+        }
     }
 
     fn el_with_attributes(self, e: HtmlElement, inside: Self::View, attributes: ElementAttributes<EventHandler<'a, MouseEvent>>) -> Self::View {

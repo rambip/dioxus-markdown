@@ -96,6 +96,7 @@
                 devShells.default = pkgs.mkShell {
                     buildInputs = with pkgs; [
                         rustToolchain
+                        dioxus-cli
                         binaryen
                         openssl 
                         pkg-config
