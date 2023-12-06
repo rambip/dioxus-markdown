@@ -6,7 +6,7 @@ The best rust crates are involved !
 Add dioxus-markdown to your project:
 ```toml
 # Cargo.toml
-yew-markdown = {git="https://github.com/rambip/dioxus-markdown"}
+dioxus-markdown = {git="https://github.com/rambip/dioxus-markdown"}
 ```
 
 If you just need to render basic markdown, you can do
