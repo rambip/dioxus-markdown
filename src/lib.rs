@@ -1,12 +1,11 @@
 use rust_web_markdown::{
     render_markdown, 
     CowStr,
-    MdComponentProps  as __MdComponentProps,
 };
 
-pub type MdComponentProps<'a> = __MdComponentProps<Element<'a>>;
+pub type MdComponentProps<'a> = rust_web_markdown::MdComponentProps<Element<'a>>;
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use core::ops::Range;
 
 pub use rust_web_markdown::{
@@ -22,11 +21,10 @@ use web_sys::window;
 
 use std::rc::Rc;
 
-type HtmlCallback<'a, T> = Rc<dyn Fn(T) -> Element<'a>>;
+pub type HtmlCallback<'a, T> = Rc<dyn Fn(&'a ScopeState, T) -> Element<'a>>;
 
 #[cfg(feature="debug")]
 pub mod debug {
-    use super::*;
     #[derive(Clone)]
     pub struct EventInfo(pub Vec<String>);
 }
@@ -62,7 +60,7 @@ pub struct MdProps<'a> {
     parse_options: Option<Options>,
 
     #[props(default)]
-    components: HashMap<String, HtmlCallback<'a, MdComponentProps<'a>>>,
+    components: BTreeMap<&'static str, HtmlCallback<'a, MdComponentProps<'a>>>,
 
     frontmatter: Option<UseState<String>>,
 }
@@ -86,7 +84,7 @@ pub struct MdContext<'a>(pub &'a Scoped<'a, MdProps<'a>>);
 impl<'a> Context<'a, 'a> for MdContext<'a> {
     type View = Element<'a>;
 
-    type HtmlCallback<T: 'a>=Rc<dyn Fn(T) -> Element<'a>>;
+    type HtmlCallback<T: 'a> = HtmlCallback<'a, T>;
 
     type Handler<T: 'a> = EventHandler<'a, T>;
 
@@ -259,8 +257,8 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
         callback.call(input)
     }
 
-    fn call_html_callback<T: 'a>(callback: &Self::HtmlCallback<T>, input: T) -> Self::View {
-        (callback)(input)
+    fn call_html_callback<T: 'a>(self, callback: &Self::HtmlCallback<T>, input: T) -> Self::View {
+        (callback)(self.0.scope, input)
     }
 
     fn make_handler<T: 'a, F: Fn(T) + 'a>(self, f: F) -> Self::Handler<T> {
