@@ -1,15 +1,13 @@
 #![allow(non_snake_case)]
-// import the prelude to get access to the `rsx!` macro and the `Scope` and `Element` types
 use dioxus::prelude::*;
 
 use dioxus_markdown::*;
 
-use std::rc::Rc;
-use std::collections::BTreeMap;
-
 static MARKDOWN_SOURCE: &str = r#"
 ## Here is a counter:
 <Counter initial="5"/>
+
+<Counter initial="a"/>
 
 ## Here is a Box:
 <box>
@@ -50,21 +48,22 @@ fn ColorBox<'a>(cx: Scope, children: Element<'a>) -> Element<'a> {
 
 // create a component that renders a div with the text "Hello, world!"
 fn App(cx: Scope) -> Element {
-    let count: HtmlCallback<MdComponentProps> = Rc::new(
-        move |cx, props| cx.render(
-            rsx!{Counter {initial: props.get_attribute("initial").unwrap_or_default()}}
-        )
+
+    let mut components = CustomComponents::new();
+
+    components.register(
+        "Counter",
+        |cx, props| Ok(render!{
+            Counter {initial: props.get("initial")?.parse()?}
+        })
     );
 
-    let color_box: HtmlCallback<MdComponentProps> = Rc::new(
-        move |cx, props| cx.render(rsx!{ColorBox {props.children}})
+    components.register(
+       "box",
+        |cx, props| Ok(render!{
+            ColorBox {props.children}
+        })
     );
-
-    let components: BTreeMap<&'static str, HtmlCallback<MdComponentProps>>
-        = BTreeMap::from([
-        ("Counter", count),
-        ("box", color_box)
-    ]);
 
     cx.render(rsx! {
         h1 {"Source"}

@@ -4,15 +4,15 @@ use rust_web_markdown::{
 };
 
 pub type MdComponentProps<'a> = rust_web_markdown::MdComponentProps<Element<'a>>;
+pub type CustomComponents<'a> = rust_web_markdown::CustomComponents<&'a ScopeState, Element<'a>>;
 
-use std::collections::BTreeMap;
 use core::ops::Range;
 
 pub use rust_web_markdown::{
     LinkDescription, Options,
     HtmlElement,
     Context,
-    ElementAttributes
+    ElementAttributes,
 };
 
 use dioxus::prelude::*;
@@ -60,7 +60,7 @@ pub struct MdProps<'a> {
     parse_options: Option<Options>,
 
     #[props(default)]
-    components: BTreeMap<&'static str, HtmlCallback<'a, MdComponentProps<'a>>>,
+    components: CustomComponents<'a>,
 
     frontmatter: Option<UseState<String>>,
 }
@@ -84,20 +84,14 @@ pub struct MdContext<'a>(pub &'a Scoped<'a, MdProps<'a>>);
 impl<'a> Context<'a, 'a> for MdContext<'a> {
     type View = Element<'a>;
 
-    type HtmlCallback<T: 'a> = HtmlCallback<'a, T>;
-
     type Handler<T: 'a> = EventHandler<'a, T>;
 
-    type Setter<T: 'static> = UseState<T>;
-    
     type MouseEvent = MouseEvent;
 
-    fn set<T: 'static + PartialEq>(self, setter: &Self::Setter<T>, value: T) {
-        if setter.get() != &value {
-            // to avoid re-rendering the parent component
-            // if not needed
-            setter.set(value)
-        }
+    type Scope = &'a ScopeState;
+
+    fn scope(self) -> Self::Scope {
+        self.0.scope
     }
 
     #[cfg(feature="debug")]
@@ -242,12 +236,11 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
         let props = self.0.props;
 
         rust_web_markdown::MarkdownProps {
+            custom_links: props.render_links.is_some(),
             components: &props.components,
-            frontmatter: props.frontmatter.as_ref(),
             hard_line_breaks: props.hard_line_breaks,
             wikilinks: props.wikilinks,
             parse_options: props.parse_options.as_ref(),
-            render_links: props.render_links.as_ref(),
             theme: props.theme.as_deref(),
         }
 
@@ -255,14 +248,6 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
 
     fn call_handler<T: 'a>(callback: &Self::Handler<T>, input: T) {
         callback.call(input)
-    }
-
-    fn call_html_callback<T: 'a>(self, callback: &Self::HtmlCallback<T>, input: T) -> Self::View {
-        (callback)(self.0.scope, input)
-    }
-
-    fn make_handler<T: 'a, F: Fn(T) + 'a>(self, f: F) -> Self::Handler<T> {
-        self.0.event_handler(f)
     }
 
     fn make_md_handler(self, position: std::ops::Range<usize>, stop_propagation: bool) -> Self::Handler<MouseEvent> {
@@ -280,6 +265,16 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
 
             on_click.map(|x| x.call(report));
         })
+    }
+
+    fn set_frontmatter(self, frontmatter: String) {
+        self.0.props.frontmatter.as_ref().map(|x| x.set(frontmatter));
+    }
+
+    fn render_links(self, link: LinkDescription<Self::View>) 
+        -> Result<Self::View, String> {
+        // TODO: remove the unwrap call
+        Ok(self.0.props.render_links.as_ref().unwrap()(self.0.scope, link))
     }
 
 }
