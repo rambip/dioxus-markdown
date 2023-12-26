@@ -6,7 +6,7 @@ use dioxus::prelude::*;
 use dioxus_markdown::Markdown;
 use dioxus_markdown::debug::EventInfo;
 
-#[inline_props]
+#[component]
 fn Logger(cx: Scope) -> Element {
     let debug_info = use_shared_state::<EventInfo>(cx).unwrap();
     render!{

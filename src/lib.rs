@@ -1,10 +1,12 @@
 use rust_web_markdown::{
     render_markdown, 
     CowStr,
+    ComponentCreationError
 };
 
+use std::collections::BTreeMap;
+
 pub type MdComponentProps<'a> = rust_web_markdown::MdComponentProps<Element<'a>>;
-pub type CustomComponents<'a> = rust_web_markdown::CustomComponents<&'a ScopeState, Element<'a>>;
 
 use core::ops::Range;
 
@@ -81,18 +83,41 @@ pub struct MarkdownMouseEvent {
 pub struct MdContext<'a>(pub &'a Scoped<'a, MdProps<'a>>);
 
 
+/// component store.
+/// It is called when therer is a `<CustomComponent>` inside the markdown source.
+/// It is basically a hashmap but more efficient for a small number of items
+pub struct CustomComponents<'a>(BTreeMap<&'static str, 
+                                   Box<dyn Fn(&'a ScopeState, MdComponentProps<'a>) -> Result<Element<'a>, ComponentCreationError>>
+>);
+
+impl Default for CustomComponents<'_> {
+    fn default() -> Self {
+        Self (Default::default())
+    }
+}
+
+impl<'a> CustomComponents<'a> 
+{
+    pub fn new() -> Self {
+        Self(Default::default())
+    }
+
+    /// register a new component.
+    /// The function `component` takes a context and props of type `MdComponentProps`
+    /// and returns html
+    pub fn register<F>(&mut self, name: &'static str, component: F)
+        where F: Fn(&'a ScopeState, MdComponentProps<'a>) -> Result<Element<'a>, ComponentCreationError> + 'static
+    {
+        self.0.insert(name, Box::new(component));
+    }
+}
+
 impl<'a> Context<'a, 'a> for MdContext<'a> {
     type View = Element<'a>;
 
     type Handler<T: 'a> = EventHandler<'a, T>;
 
     type MouseEvent = MouseEvent;
-
-    type Scope = &'a ScopeState;
-
-    fn scope(self) -> Self::Scope {
-        self.0.scope
-    }
 
     #[cfg(feature="debug")]
     fn send_debug_info(self, info: Vec<String>) {
@@ -232,12 +257,11 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
         }))
     }
 
-    fn props(self) -> rust_web_markdown::MarkdownProps<'a, 'a, Self> {
+    fn props(self) -> rust_web_markdown::MarkdownProps<'a> {
         let props = self.0.props;
 
         rust_web_markdown::MarkdownProps {
             custom_links: props.render_links.is_some(),
-            components: &props.components,
             hard_line_breaks: props.hard_line_breaks,
             wikilinks: props.wikilinks,
             parse_options: props.parse_options.as_ref(),
@@ -277,6 +301,14 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
         Ok(self.0.props.render_links.as_ref().unwrap()(self.0.scope, link))
     }
 
+    fn has_custom_component(self, name: &str) -> bool {
+        self.0.props.components.0.get(name).is_some()
+    }
+
+    fn render_custom_component(self, name: &str, input: rust_web_markdown::MdComponentProps<Self::View>) -> Result<Self::View, ComponentCreationError> {
+        let f = self.0.props.components.0.get(name).unwrap();
+        f(self.0.scope, input)
+    }
 }
 
 #[allow(non_snake_case)]
