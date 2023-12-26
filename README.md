@@ -39,3 +39,8 @@ You can test for yourself [here](https://rambip.github.io/dioxus-markdown/editor
 ## Interactivity
 see [here](https://rambip.github.io/dioxus-markdown/onclick)
 
+## Custom Components
+
+You can define your own components in your code and call them inside markdown !
+
+see [here](https://rambip.github.io/dioxus-markdown/custom_components)
