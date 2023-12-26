@@ -55,7 +55,8 @@ Even todo lists:
 fn App(cx: Scope) -> Element {
     cx.render(rsx! {
         Markdown {
-            src: MARKDOWN_SOURCE
+            src: MARKDOWN_SOURCE,
+            wikilinks: true,
         }
     })
 }
