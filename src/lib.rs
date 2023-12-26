@@ -261,7 +261,6 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
         let props = self.0.props;
 
         rust_web_markdown::MarkdownProps {
-            custom_links: props.render_links.is_some(),
             hard_line_breaks: props.hard_line_breaks,
             wikilinks: props.wikilinks,
             parse_options: props.parse_options.as_ref(),
@@ -293,6 +292,10 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
 
     fn set_frontmatter(self, frontmatter: String) {
         self.0.props.frontmatter.as_ref().map(|x| x.set(frontmatter));
+    }
+
+    fn has_custom_links(self) -> bool {
+        self.0.props.render_links.is_some()
     }
 
     fn render_links(self, link: LinkDescription<Self::View>) 
