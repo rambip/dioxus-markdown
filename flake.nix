@@ -62,6 +62,12 @@
                 doCheck = false;
             };
 
+            wasmBindgen = pkgs.wasm-bindgen-cli.override {
+                version = "0.2.87";
+                hash = "sha256-0u9bl+FkXEK2b54n7/l9JOCtKo+pb42GF9E1EnAUQa0=";
+                cargoHash = "sha256-AsZBtE2qHJqQtuCt/wCAgOoxYMfvDh8IzBPAOkYSYko=";
+            };
+
             buildExample = name: craneLib.buildTrunkPackage {
                 inherit CARGO_BUILD_TARGET cargoArtifacts;
                 src = fullSrc;
@@ -73,11 +79,7 @@
                 trunkExtraBuildArgs = "--public-url=/dioxus-markdown/${name}";
 
                 nativeBuildInputs = [
-                    (pkgs.wasm-bindgen-cli.override {
-                        version = "0.2.87";
-                        hash = "sha256-0u9bl+FkXEK2b54n7/l9JOCtKo+pb42GF9E1EnAUQa0=";
-                        cargoHash = "sha256-AsZBtE2qHJqQtuCt/wCAgOoxYMfvDh8IzBPAOkYSYko=";
-                    })
+                    wasmBindgen
                 ];
             };
             example_names = builtins.attrNames(builtins.readDir ./examples);
@@ -102,6 +104,7 @@
                         pkg-config
                         trunk
                         rust-analyzer
+                        wasmBindgen
                     ];
                 };
             }
