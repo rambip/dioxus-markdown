@@ -9,6 +9,8 @@ static MARKDOWN_SOURCE: &str = r#"
 
 <Counter initial="a"/>
 
+<Counter/>
+
 ## Here is a Box:
 <box>
 
@@ -54,7 +56,7 @@ fn App(cx: Scope) -> Element {
     components.register(
         "Counter",
         |cx, props| Ok(render!{
-            Counter {initial: props.get("initial")?.parse()?}
+            Counter {initial: props.get_parsed_optional("initial")?.unwrap_or(0)}
         })
     );
 
