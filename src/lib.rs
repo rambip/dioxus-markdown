@@ -19,8 +19,6 @@ pub use rust_web_markdown::{
 
 use dioxus::prelude::*;
 
-use web_sys::window;
-
 use std::rc::Rc;
 
 pub type HtmlCallback<'a, T> = Rc<dyn Fn(&'a ScopeState, T) -> Element<'a>>;
@@ -223,20 +221,31 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
     }
 
     fn mount_dynamic_link(self, rel: &str, href: &str, integrity: &str, crossorigin: &str) {
-        let document = window().unwrap().document().unwrap();
+        let create_eval = use_eval(self.0);
 
-        let link = document
-            .create_element("link")
-            .unwrap();
+        let eval = create_eval(
+            r#"
+            // https://stackoverflow.com/a/18510577
+            let rel = await dioxus.recv();
+            let href = await dioxus.recv();
+            let integrity = await dioxus.recv();
+            let crossorigin = await dioxus.recv();
+            var newstyle = document.createElement("link"); // Create a new link Tag
 
-        link.set_attribute("rel", rel).unwrap();
-        link.set_attribute("href", href).unwrap();
-        link.set_attribute("integrity", integrity).unwrap();
-        link.set_attribute("crossorigin", crossorigin).unwrap();
+            newstyle.setAttribute("rel", rel);
+            newstyle.setAttribute("type", "text/css");
+            newstyle.setAttribute("href", href); 
+            newstyle.setAttribute("crossorigin", crossorigin); 
+            document.getElementsByTagName("head")[0].appendChild(newstyle);
+            "#,
+        )
+        .unwrap();
 
-        document.head()
-            .unwrap()
-            .append_child(&link).unwrap();
+        // You can send messages to JavaScript with the send method
+        eval.send(rel.into()).unwrap();
+        eval.send(href.into()).unwrap();
+        eval.send(integrity.into()).unwrap();
+        eval.send(crossorigin.into()).unwrap();
     }
 
 
