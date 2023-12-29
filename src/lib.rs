@@ -236,6 +236,7 @@ impl<'a> Context<'a, 'a> for MdContext<'a> {
             newstyle.setAttribute("type", "text/css");
             newstyle.setAttribute("href", href); 
             newstyle.setAttribute("crossorigin", crossorigin); 
+            newstyle.setAttribute("integrity", integrity); 
             document.getElementsByTagName("head")[0].appendChild(newstyle);
             "#,
         )
