@@ -1,7 +1,6 @@
 use rust_web_markdown::{
     render_markdown, 
     CowStr,
-    ComponentCreationError
 };
 
 use std::collections::BTreeMap;
@@ -15,6 +14,7 @@ pub use rust_web_markdown::{
     HtmlElement,
     Context,
     ElementAttributes,
+    ComponentCreationError,
 };
 
 use dioxus::prelude::*;

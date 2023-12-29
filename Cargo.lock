@@ -438,7 +438,7 @@ dependencies = [
 
 [[package]]
 name = "dioxus-markdown"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "dioxus",
  "dioxus-web",
@@ -843,9 +843,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.6.4"
+version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f665ee40bc4a3c5590afb1e9677db74a508659dfd71e126420da8274909a0167"
+checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
 
 [[package]]
 name = "miniz_oxide"
@@ -970,8 +970,8 @@ dependencies = [
 
 [[package]]
 name = "pulldown-cmark-wikilink"
-version = "0.1.3"
-source = "git+https://github.com/rambip/pulldown-cmark-wikilink#fc370642a61dee333ccf83182fdf32234486e4a5"
+version = "0.1.4"
+source = "git+https://github.com/rambip/pulldown-cmark-wikilink#0f4c29624c77713ddcc08b4967d091a4c03f290d"
 dependencies = [
  "pulldown-cmark",
 ]
