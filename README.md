@@ -1,3 +1,9 @@
+# Disclaimer
+
+This project will move to **https://github.com/rambip/rust-web-markdown**
+
+ Be sure to check it out and to star the project !
+ 
 # Goal
 A simple library to render markdown with dioxus, at runtime.
 The best rust crates are involved !
