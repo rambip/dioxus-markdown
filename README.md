@@ -1,8 +1,12 @@
 # Disclaimer
 
-This project will move to **https://github.com/rambip/rust-web-markdown**
+This repository is now archived.
+It moved to **https://github.com/rambip/rust-web-markdown**
 
- Be sure to check it out and to star the project !
+That was the bad news. The good news is that in the meantime, you can use install `dioxus-markdown` from crates.io !
+
+https://github.com/rambip/dioxus-markdown/edit/main/README.md
+
  
 # Goal
 A simple library to render markdown with dioxus, at runtime.
